@@ -112,7 +112,9 @@ window.Portfolio.initProjects = function () {
   let targetProgress = 0;    // raw from scroll
 
   function updateHelix() {
-    progress += (targetProgress - progress) * 0.12;
+    // Snap if very close to avoid infinite micro-lerp drift
+    const diff = targetProgress - progress;
+    progress += Math.abs(diff) < 0.0005 ? diff : diff * 0.12;
 
     // Remap raw progress → "adjusted" progress used by the helix.
     // Negative values during lead-in keep card 0 queued slightly back
@@ -182,16 +184,23 @@ window.Portfolio.initProjects = function () {
   function setupScroll() {
     if (window.gsap && window.ScrollTrigger) {
       gsap.registerPlugin(ScrollTrigger);
-      ScrollTrigger.create({
+      const st = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.5,
+        scrub: 1,                        // tighter coupling; was 0.5
         onUpdate: (self) => {
           targetProgress = self.progress;
         },
+        onRefreshInit: (self) => {
+          // Sync immediately on any refresh so position is never stale
+          targetProgress = self.progress;
+          progress = self.progress;      // snap lerp target too
+        },
         onInit: (self) => {
           window.Portfolio._projectsScrollTrigger = self;
+          // Recalculate after the initial layout paint
+          setTimeout(() => ScrollTrigger.refresh(), 150);
         }
       });
     } else {
