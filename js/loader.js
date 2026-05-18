@@ -6,6 +6,9 @@
 (function () {
   'use strict';
 
+  /* Run after DOM is ready so document.body is not null */
+  function run() {
+
   /* ─────────────────────────────────────────
      0.  Bail if the user has already visited
          (skip loader on subsequent page loads)
@@ -308,17 +311,10 @@
   }
 
   /* ─────────────────────────────────────────
-     4.  Load Three.js, then build scene
+     4.  Build Three.js scene
+         (Three.js is already loaded by index.html)
   ───────────────────────────────────────── */
-  function loadScript(src, cb) {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = cb;
-    s.onerror = cb; // graceful degradation
-    document.head.appendChild(s);
-  }
-
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', initScene);
+  initScene();
 
   function initScene() {
     // Show atmosphere as soon as Three.js is ready
@@ -610,6 +606,14 @@
       loader.remove();
       document.getElementById('nv-loader-style')?.remove();
     }, { once: true });
+  }
+
+  } // end run()
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run(); // DOM already parsed (script loaded with defer/async)
   }
 
 })();
