@@ -446,6 +446,13 @@
     const matBook      = new THREE.MeshStandardMaterial({ color: 0x7C5CFF, roughness: 0.6 });
     const matPlant     = new THREE.MeshStandardMaterial({ color: 0x34D399, roughness: 0.7 });
 
+    /* Load first frame for screen display */
+    let matScreenFrame = null;
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load('frames/ezgif-frame-001.jpg', (texture) => {
+      matScreenFrame = new THREE.MeshBasicMaterial({ map: texture });
+    });
+
     const ws = new THREE.Group();
     scene.add(ws);
 
@@ -599,7 +606,8 @@
       // Screen power-on: 2.4s
       if (elapsed > 2.4 && !screenOn) {
         screenOn = true;
-        screenMesh.material = matScreenGlow;
+        // Use frame texture if loaded, otherwise glow color
+        screenMesh.material = matScreenFrame || matScreenGlow;
         if (!powerActive) { powerActive=true; activatePill('pill-power'); }
       }
       if (screenOn && elapsed > 2.4) {
