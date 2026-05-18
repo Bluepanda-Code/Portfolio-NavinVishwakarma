@@ -23,6 +23,18 @@
   <link rel="preload" as="image" type="image/jpeg" href="frames/ezgif-frame-005.jpg" />
 
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body.nv-loading {
+      overflow: hidden;
+    }
+
+    #nv-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #050510;
+    }
+  </style>
 
   <!-- ╔═══════════════════════════════════════╗
        ║  LOADER — must be first script block  ║
@@ -31,7 +43,20 @@
   <script src="js/loader.js"></script>
 </head>
 
-<body>
+<body class="nv-loading">
+  <div id="nv-loader" role="progressbar" aria-label="Loading portfolio" aria-valuemin="0" aria-valuemax="100">
+    <div id="nv-canvas-wrap"></div>
+    <div id="nv-atmo"></div>
+    <div id="nv-flash"></div>
+    <div id="nv-hud">
+      <div id="nv-hud-logo">NV.</div>
+      <div id="nv-hud-bar-wrap">
+        <div id="nv-hud-bar"></div>
+      </div>
+      <div id="nv-hud-label">// initialising workspace</div>
+    </div>
+    <div id="nv-counter">00</div>
+  </div>
 
   <!-- Custom cursor -->
   <div class="cursor" id="cursor"></div>

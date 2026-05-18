@@ -47,9 +47,12 @@
     </div>
   `;
 
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = loaderHTML.trim();
-  document.body.insertBefore(wrapper.firstElementChild, document.body.firstChild);
+  const existingLoader = document.getElementById('nv-loader');
+  if (!existingLoader) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = loaderHTML.trim();
+    document.body.insertBefore(wrapper.firstElementChild, document.body.firstChild);
+  }
 
   /* ─────────────────────────────────────────
      2.  Inject CSS (scoped to #nv-loader)
