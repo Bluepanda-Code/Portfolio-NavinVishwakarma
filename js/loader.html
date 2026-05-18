@@ -1,0 +1,281 @@
+< !DOCTYPE html >
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Navin Portfolio - Isometric Build Loader</title>
+
+                    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+
+                        <style>
+    /* --- 1. Core Variables --- */
+                            :root {
+                                --loader - bg: #080f1a;
+                            --loader-accent: #00d2ff;
+                            --loader-text: #ffffff;
+    }
+
+                            body, html {
+                                margin: 0;
+                            padding: 0;
+                            height: 100%;
+                            background-color: var(--loader-bg);
+                            font-family: 'Poppins', sans-serif;
+                            overflow: hidden; 
+    }
+
+                            /* --- 2. Loader Overlays --- */
+                            #nv-loader-container {
+                                position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            z-index: 9999;
+                            background-color: var(--loader-bg);
+                            transition: opacity 0.4s ease;
+    }
+
+                            #canvas-container {
+                                position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            z-index: 1;
+    }
+
+                            /* The "Screen Flash" that triggers right before revealing the portfolio */
+                            #flash-overlay {
+                                position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: var(--loader-accent);
+                            z-index: 2;
+                            opacity: 0;
+                            pointer-events: none;
+    }
+
+                            /* --- 3. Dummy Portfolio Content --- */
+                            .dummy-content {
+                                display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            color: white;
+                            text-align: center;
+    }
+                        </style>
+                    </head>
+                    <body>
+
+                        <!-- ===============================
+                        LOADER UI
+       =============================== -->
+                        <div id="nv-loader-container">
+                            <div id="canvas-container"></div>
+                            <div id="flash-overlay"></div>
+                        </div>
+
+                        <!-- ===============================
+                        ACTUAL PORTFOLIO CONTENT
+       =============================== -->
+                        <div class="dummy-content">
+                            <h1 style="color: #00d2ff; font-size: 3.5rem; margin-bottom: 0;">Navin Vishwakarma</h1>
+                            <p style="font-size: 1.2rem; color: #8892b0;">The isometric build has completed.</p>
+                        </div>
+
+                        <!-- ===============================
+                        THREE.JS SCRIPT
+       =============================== -->
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+                        <script>
+    // --- Setup Scene ---
+                            const container = document.getElementById('canvas-container');
+                            const scene = new THREE.Scene();
+
+                            // Simulate Isometric look with a far-away Perspective Camera and narrow FOV
+                            const camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 0.1, 1000);
+                            const startCamPos = new THREE.Vector3(15, 12, 15);
+                            camera.position.copy(startCamPos);
+                            camera.lookAt(0, 1, 0);
+
+                            const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true });
+                            renderer.setSize(window.innerWidth, window.innerHeight);
+                            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                            container.appendChild(renderer.domElement);
+
+                            // --- Lighting ---
+                            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+                            scene.add(ambientLight);
+
+                            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+                            dirLight.position.set(10, 20, 5);
+                            scene.add(dirLight);
+
+                            // The neon blue glow from the monitor
+                            const screenLight = new THREE.PointLight(0x00d2ff, 0, 10); // Intensity starts at 0
+                            screenLight.position.set(0, 2.5, 0.5);
+                            scene.add(screenLight);
+
+                            // --- Materials ---
+                            const matDark = new THREE.MeshStandardMaterial({color: 0x1a2332, roughness: 0.8 });
+                            const matWood = new THREE.MeshStandardMaterial({color: 0x2a364f, roughness: 0.5 });
+                            const matScreenOff = new THREE.MeshStandardMaterial({color: 0x05080f, roughness: 0.2 });
+                            const matScreenOn = new THREE.MeshBasicMaterial({color: 0x00d2ff });
+
+                            // --- Object Construction ---
+                            const workspace = new THREE.Group();
+                            scene.add(workspace);
+
+                            // 1. Grid/Floor
+                            const grid = new THREE.GridHelper(10, 10, 0x00d2ff, 0x00d2ff);
+                            grid.material.opacity = 0.2;
+                            grid.material.transparent = true;
+                            workspace.add(grid);
+
+                            // 2. Desk
+                            const desk = new THREE.Group();
+                            const deskTop = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 2), matWood);
+                            deskTop.position.y = 1.5;
+                            const legL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 1.8), matDark);
+                            legL.position.set(-1.8, 0.75, 0);
+                            const legR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 1.8), matDark);
+                            legR.position.set(1.8, 0.75, 0);
+                            desk.add(deskTop, legL, legR);
+                            workspace.add(desk);
+
+                            // 3. Chair
+                            const chair = new THREE.Group();
+                            const seat = new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 1), matDark);
+                            seat.position.set(0, 0.8, 1.5);
+                            const backrest = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.1), matDark);
+                            backrest.position.set(0, 1.3, 1.95);
+                            const chairBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.4, 0.8), matDark);
+                            chairBase.position.set(0, 0.4, 1.5);
+                            chair.add(seat, backrest, chairBase);
+                            workspace.add(chair);
+
+                            // 4. Monitor
+                            const monitor = new THREE.Group();
+                            const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.3, 0.5), matDark);
+                            stand.position.set(0, 1.75, -0.4);
+                            const displayBack = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 0.1), matDark);
+                            displayBack.position.set(0, 2.5, -0.4);
+
+                            // The glowing screen face
+                            const screenGeo = new THREE.PlaneGeometry(2.3, 1.3);
+                            const screenMesh = new THREE.Mesh(screenGeo, matScreenOff);
+                            screenMesh.position.set(0, 2.5, -0.34);
+
+                            monitor.add(stand, displayBack, screenMesh);
+                            workspace.add(monitor);
+
+                            // --- Animation Timeline Setup ---
+                            // Start everything scaled to 0
+                            desk.scale.set(0,0,0);
+                            chair.scale.set(0,0,0);
+                            monitor.scale.set(0,0,0);
+
+                            // Easing function for the "snappy" build effect
+                            function easeOutBack(x) {
+      const c1 = 1.70158;
+                            const c3 = c1 + 1;
+                            return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+                            function easeInOutQuad(x) {
+      return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    }
+
+                            const startTime = Date.now();
+                            let screenOn = false;
+
+                            // Target positions for the camera dive
+                            const targetCamPos = new THREE.Vector3(0, 2.5, -0.2); // Right up to the screen
+                            const lookTarget = new THREE.Vector3(0, 1, 0); // Where the camera is initially looking
+                            const finalLookTarget = new THREE.Vector3(0, 2.5, -0.34); // Center of the monitor
+
+                            function animate() {
+                                requestAnimationFrame(animate);
+                            const elapsed = (Date.now() - startTime) / 1000; // Seconds
+
+      // 1. Desk pops in (0.1s to 0.6s)
+      if (elapsed > 0.1) {
+                                let p = Math.min(1, (elapsed - 0.1) / 0.5);
+                            let s = easeOutBack(p);
+                            desk.scale.set(s,s,s);
+      }
+
+      // 2. Chair pops in (0.3s to 0.8s)
+      if (elapsed > 0.3) {
+                                let p = Math.min(1, (elapsed - 0.3) / 0.5);
+                            let s = easeOutBack(p);
+                            chair.scale.set(s,s,s);
+      }
+
+      // 3. Monitor pops in (0.5s to 1.0s)
+      if (elapsed > 0.5) {
+                                let p = Math.min(1, (elapsed - 0.5) / 0.5);
+                            let s = easeOutBack(p);
+                            monitor.scale.set(s,s,s);
+      }
+
+      // 4. Power On (1.2s)
+      if (elapsed > 1.2 && !screenOn) {
+                                screenOn = true;
+                            screenMesh.material = matScreenOn; // Switch to glowing blue
+                            screenLight.intensity = 4; // Turn on point light
+      }
+
+      // 5. Camera Dive (2.0s to 2.6s)
+      if (elapsed > 2.0) {
+                                let p = Math.min(1, (elapsed - 2.0) / 0.6);
+                            let easeP = easeInOutQuad(p);
+
+                            // Interpolate camera position
+                            camera.position.lerpVectors(startCamPos, targetCamPos, easeP);
+
+                            // Interpolate where the camera is looking
+                            const currentLook = new THREE.Vector3();
+                            currentLook.lerpVectors(new THREE.Vector3(0, 1, 0), finalLookTarget, easeP);
+                            camera.lookAt(currentLook);
+
+        // Flash overlay triggers as camera gets extremely close
+        if (elapsed > 2.4) {
+                                document.getElementById('flash-overlay').style.opacity = '1';
+        }
+      }
+
+                            renderer.render(scene, camera);
+    }
+
+                            animate();
+
+    // --- Cleanup & Fade Out ---
+    window.addEventListener('DOMContentLoaded', () => {
+                                // Entire loader hides completely at 2.8s
+                                setTimeout(() => {
+                                    const loader = document.getElementById('nv-loader-container');
+                                    loader.style.opacity = '0';
+
+                                    setTimeout(() => {
+                                        loader.style.display = 'none';
+                                        document.body.style.overflow = 'auto'; // Restore scroll
+                                    }, 400);
+                                }, 2800);
+    });
+
+    // Resize Handler
+    window.addEventListener('resize', () => {
+                                camera.aspect = window.innerWidth / window.innerHeight;
+                            camera.updateProjectionMatrix();
+                            renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+                        </script>
+                    </body>
+                </html>
